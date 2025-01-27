@@ -13,7 +13,7 @@ const maxFrameDelay = 3; // Adjust to slow down frame transitions
 
 // Preload assets
 const background = new Image();
-background.src = "assets/field.jpg";
+background.src = "assets/field.png";
 
 const sprites = [];
 for (let i = 1; i <= frameCount; i++) {
