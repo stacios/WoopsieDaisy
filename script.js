@@ -16,10 +16,18 @@ const background = new Image();
 background.src = "assets/field.png";
 
 const sprites = [];
+const spriteLoadPromises = []; // To track when sprites are fully loaded
 for (let i = 1; i <= frameCount; i++) {
     const img = new Image();
     img.src = `assets/Run (${i}).png`;
     sprites.push(img);
+
+    // Track the load event for each sprite
+    spriteLoadPromises.push(
+        new Promise((resolve) => {
+            img.onload = resolve;
+        })
+    );
 }
 
 // Load background music
@@ -72,12 +80,12 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// Start the animation when everything is loaded
-background.onload = () => {
-    Promise.all(
-        sprites.map((img) => new Promise((resolve) => (img.onload = resolve)))
-    ).then(() => {
-        animate();
-    });
-};
+// Ensure all assets are loaded before starting the animation
+Promise.all([
+    new Promise((resolve) => (background.onload = resolve)), // Wait for background
+    ...spriteLoadPromises, // Wait for all sprites
+]).then(() => {
+    console.log("All assets loaded. Starting animation...");
+    animate();
+});
 
