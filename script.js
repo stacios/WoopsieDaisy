@@ -1,54 +1,63 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Images
-const girlSprite = new Image();
-const fieldBackground = new Image();
+// Variables
+const frameCount = 20; // Total number of sprite frames
+let currentFrame = 0; // Current frame index
+let runnerX = -100; // Runner's starting X position
+const runnerY = canvas.height - 150; // Runner's Y position
+let speed = 2; // Runner's speed
+let bgX = 0; // Background scrolling position
+let frameDelay = 0; // Counter for frame delay
+const maxFrameDelay = 3; // Adjust to slow down frame transitions
 
-girlSprite.src = "girl_running_sprite.png"; // Path to your sprite sheet
-fieldBackground.src = "field_background.png"; // Path to your field background
+// Preload assets
+const background = new Image();
+background.src = "assets/field.jpg";
 
-// Variables for animation
-let frameIndex = 0; // Current frame of the sprite
-const frameCount = 6; // Number of frames in the sprite sheet
-const frameWidth = 100; // Width of each frame in the sprite sheet
-const frameHeight = 120; // Height of each frame
-let girlX = -frameWidth; // Starting position off-screen (left)
-
-// Animation speed
-const fps = 12; // Frames per second
-const speed = 2; // Pixels moved per frame
-
-// Draw frame function
-function drawFrame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-
-    // Draw background (repeat for scrolling effect if needed)
-    ctx.drawImage(fieldBackground, 0, 0, canvas.width, canvas.height);
-
-    // Draw girl
-    ctx.drawImage(
-        girlSprite,
-        frameIndex * frameWidth, // Source X
-        0, // Source Y
-        frameWidth, frameHeight, // Source Width/Height
-        girlX, canvas.height - frameHeight, // Destination X/Y
-        frameWidth, frameHeight // Destination Width/Height
-    );
-
-    // Update position and frame
-    girlX += speed;
-    frameIndex = (frameIndex + 1) % frameCount;
-
-    // Loop the animation
-    if (girlX > canvas.width) girlX = -frameWidth;
-
-    setTimeout(() => requestAnimationFrame(drawFrame), 1000 / fps);
+const sprites = [];
+for (let i = 1; i <= frameCount; i++) {
+    const img = new Image();
+    img.src = `assets/Run (${i}).png`;
+    sprites.push(img);
 }
 
-// Start animation once assets are loaded
-girlSprite.onload = () => {
-    fieldBackground.onload = () => {
-        drawFrame();
-    };
+// Animation loop
+function animate() {
+    ctx.imageSmoothingEnabled = true; // Enable image smoothing for higher quality
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw scrolling background
+    bgX -= 1; // Adjust background speed
+    if (bgX <= -canvas.width) bgX = 0;
+    ctx.drawImage(background, bgX, 0, canvas.width, canvas.height);
+    ctx.drawImage(background, bgX + canvas.width, 0, canvas.width, canvas.height);
+
+    // Draw runner
+    ctx.drawImage(sprites[currentFrame], runnerX, runnerY, 100, 100);
+
+    // Update frame (delayed to slow animation)
+    frameDelay++;
+    if (frameDelay >= maxFrameDelay) {
+        currentFrame = (currentFrame + 1) % frameCount;
+        frameDelay = 0;
+    }
+
+    // Update runner's position
+    runnerX += speed;
+    if (runnerX > canvas.width) {
+        runnerX = -100; // Reset runner position when off-screen
+    }
+
+    // Request the next frame
+    requestAnimationFrame(animate);
+}
+
+// Start the animation when everything is loaded
+background.onload = () => {
+    Promise.all(
+        sprites.map((img) => new Promise((resolve) => (img.onload = resolve)))
+    ).then(() => {
+        animate();
+    });
 };
