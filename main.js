@@ -1,93 +1,114 @@
-const gameEngine = new GameEngine();
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const ASSET_MANAGER = new AssetManager();
+// Fixed dimensions for canvas
+const canvasWidth = canvas.width;
+const canvasHeight = canvas.height;
 
-// Queue assets
-ASSET_MANAGER.queueDownload("./assets/field.png");
-for (let i = 1; i <= 20; i++) {
-    ASSET_MANAGER.queueDownload(`./assets/Run (${i}).png`);
-}
-ASSET_MANAGER.queueDownload("./assets/lofi-velvet-lazy-day.mp3");
+// Variables
+const frameCount = 20; // Total number of sprite frames
+let currentFrame = 0; // Current frame index
+let runnerX = -100; // Runner's starting X position
+const runnerY = canvasHeight - 150; // Runner's Y position
+let speed = 1; // Runner's speed
+let bgX = 0; // Background scrolling position
+const bgScrollSpeed = 0.5; // Adjust this to slow down scrolling
+const animationSpeed = 120; // Milliseconds per frame
+let lastTime = 0; // Timestamp of the last frame
 
-// Define the Runner class
-class Runner {
-    constructor(game, x, y, speed) {
-        this.game = game;
-        this.x = x;
-        this.y = y;
-        this.speed = speed;
-        this.bgX = 0;
+// Preload assets
+const background = new Image();
+background.src = "assets/field.png";
 
-        // Load animation frames from AssetManager
-        this.frames = [];
-        for (let i = 1; i <= 20; i++) {
-            this.frames.push(ASSET_MANAGER.getAsset(`./assets/Run (${i}).png`));
-        }
+const sprites = [];
+const spriteLoadPromises = [];
+for (let i = 1; i <= frameCount; i++) {
+    const img = new Image();
+    img.src = `assets/Run (${i}).png`;
+    sprites.push(img);
 
-        this.animator = new Animator(this.frames, 0.1); // Animation frame delay
-    }
-
-    update() {
-        this.animator.update(this.game.clockTick);
-
-        // Move the runner and background
-        this.x += this.speed;
-        if (this.x > this.game.ctx.canvas.width) {
-            this.x = -100; // Reset runner position
-        }
-
-        this.bgX -= 1;
-        if (this.bgX <= -this.game.ctx.canvas.width) {
-            this.bgX = 0;
-        }
-    }
-
-    draw(ctx) {
-        // Draw the background
-        const bg = ASSET_MANAGER.getAsset("./assets/field.png");
-        ctx.drawImage(bg, this.bgX, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.drawImage(bg, this.bgX + ctx.canvas.width, 0, ctx.canvas.width, ctx.canvas.height);
-
-        // Draw the runner
-        this.animator.draw(ctx, this.x, this.y, 100, 100);
-    }
+    // Track the load event for each sprite
+    spriteLoadPromises.push(
+        new Promise((resolve) => {
+            img.onload = resolve;
+        })
+    );
 }
 
-// Animator class for handling sprite animation
-class Animator {
-    constructor(frames, frameDuration) {
-        this.frames = frames;
-        this.frameDuration = frameDuration; // Delay between frames
-        this.elapsedTime = 0;
-        this.currentFrame = 0;
-    }
+// Background music
+const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.5;
 
-    update(tick) {
-        this.elapsedTime += tick;
-        if (this.elapsedTime >= this.frameDuration) {
-            this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-            this.elapsedTime = 0;
-        }
-    }
-
-    draw(ctx, x, y, width, height) {
-        ctx.drawImage(this.frames[this.currentFrame], x, y, width, height);
-    }
-}
-
-// Start the game after all assets are loaded
-ASSET_MANAGER.downloadAll(() => {
-    console.log("All assets downloaded!");
-
-    const canvas = document.getElementById("gameWorld");
-    const ctx = canvas.getContext("2d");
-
-    gameEngine.init(ctx);
-
-    // Add the Runner entity
-    const runner = new Runner(gameEngine, -100, canvas.height - 150, 2);
-    gameEngine.addEntity(runner);
-
-    gameEngine.start();
+// Attempt to play background music immediately
+document.addEventListener("DOMContentLoaded", () => {
+    backgroundMusic.play().catch((error) => {
+        console.warn("Autoplay blocked. Retrying playback...");
+        retryMusicPlayback();
+    });
 });
 
+// Retry music playback
+function retryMusicPlayback() {
+    const interval = setInterval(() => {
+        backgroundMusic.play()
+            .then(() => {
+                clearInterval(interval);
+            })
+            .catch(() => {
+                console.warn("Retrying music playback...");
+            });
+    }, 1000);
+}
+
+// Draw the background to fit the canvas
+function drawBackground() {
+    // Draw the first instance of the background
+    ctx.drawImage(background, bgX, 0, canvasWidth, canvasHeight);
+
+    // Draw the second instance for seamless scrolling
+    ctx.drawImage(background, bgX + canvasWidth, 0, canvasWidth, canvasHeight);
+}
+
+// Animation loop
+function animate(timestamp) {
+    ctx.imageSmoothingEnabled = true; // Enable high-quality rendering
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    // Draw the background
+    drawBackground();
+
+    // Scroll the background more slowly
+    bgX -= bgScrollSpeed; // Slower scrolling speed
+    if (bgX <= -canvasWidth) {
+        bgX = 0; // Reset background position for seamless scrolling
+    }
+
+    // Calculate elapsed time for smoother frame updates
+    const elapsedTime = timestamp - lastTime;
+    if (elapsedTime > animationSpeed) {
+        currentFrame = (currentFrame + 1) % frameCount; // Update the frame
+        lastTime = timestamp; // Reset the timestamp
+    }
+
+    // Draw the runner
+    ctx.drawImage(sprites[currentFrame], runnerX, runnerY, 120, 120);
+
+    // Update runner's position
+    runnerX += speed;
+    if (runnerX > canvasWidth) {
+        runnerX = -100; // Reset position when off-screen
+    }
+
+    // Request the next animation frame
+    requestAnimationFrame(animate);
+}
+
+// Start the animation after assets are loaded
+Promise.all([
+    new Promise((resolve) => (background.onload = resolve)),
+    ...spriteLoadPromises
+]).then(() => {
+    console.log("All assets loaded. Starting animation...");
+    animate(0); // Start the animation
+});

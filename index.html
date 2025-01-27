@@ -1,29 +1,29 @@
-﻿
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Running Animation</title>
-
     <style>
+        body {
+            margin: 0;
+            background-color: #87ceeb;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
         canvas {
             display: block;
-            margin: 0 auto;/*<script src="script.js"></script> */
-            background-color: #87ceeb; /* Sky blue */
+            margin: 20px auto;
+            background-color: white;
+            border: 1px solid black;
         }
     </style>
-  
-    <script type="text/javascript" src="./assetmanager.js"></script>
-    <script type="text/javascript" src="./timer.js"></script>
-    <script type="text/javascript" src="./gameengine.js"></script>
-    <script type="text/javascript" src="./util.js"></script>
-    <script type="text/javascript" src="./main.js"></script>
 </head>
 <body>
-    <canvas id="gameWorld" width="800" height="568" style="background: white; border: 1px solid black" tabindex="0" autofocus></canvas>
-   
+    <canvas id="gameCanvas" width="1010" height="600"></canvas>
+    <script src="main.js"></script>
 </body>
 </html>
+
 
 
