@@ -22,6 +22,25 @@ for (let i = 1; i <= frameCount; i++) {
     sprites.push(img);
 }
 
+// Load background music
+const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
+backgroundMusic.loop = true; // Loop the music
+backgroundMusic.volume = 0.5; // Set initial volume
+
+// Attempt to play background music immediately
+document.addEventListener("DOMContentLoaded", () => {
+    backgroundMusic.play().catch((error) => {
+        console.warn("Autoplay blocked. Attempting user interaction to enable music:", error);
+
+        // Fallback: Play music on first user interaction
+        document.addEventListener("click", () => {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+            }
+        });
+    });
+});
+
 // Animation loop
 function animate() {
     ctx.imageSmoothingEnabled = true; // Enable image smoothing for higher quality
@@ -61,3 +80,4 @@ background.onload = () => {
         animate();
     });
 };
+
