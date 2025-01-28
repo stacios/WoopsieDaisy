@@ -2,14 +2,14 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 // Fixed dimensions for canvas
-const canvasWidth = canvas.width;
-const canvasHeight = canvas.height;
+const canvasWidth = canvas.width-100;
+const canvasHeight = canvas.height-250;
 
 // Variables
 const frameCount = 20; // Total number of sprite frames
 let currentFrame = 0; // Current frame index
 let runnerX = -100; // Runner's starting X position
-const runnerY = canvasHeight - 150; // Runner's Y position
+const runnerY = canvasHeight - 50; // Runner's Y position
 let speed = 1; // Runner's speed
 let bgX = 0; // Background scrolling position
 const bgScrollSpeed = 0.5; // Adjust this to slow down scrolling
@@ -64,10 +64,10 @@ function retryMusicPlayback() {
 // Draw the background to fit the canvas
 function drawBackground() {
     // Draw the first instance of the background
-    ctx.drawImage(background, bgX, 0, canvasWidth + 1, canvasHeight);
+    ctx.drawImage(background, bgX, 80, canvasWidth + 1, canvasHeight);
     
     // Draw the second instance for seamless scrolling
-    ctx.drawImage(background, bgX + canvasWidth, 0, canvasWidth + 1, canvasHeight);
+    ctx.drawImage(background, bgX + canvasWidth, 80, canvasWidth + 1, canvasHeight);
      
     // Wrap around to avoid gaps
      if (bgX <= -canvasWidth) {
@@ -102,7 +102,7 @@ function animate(timestamp) {
     }
 
     // Draw the runner
-    ctx.drawImage(sprites[currentFrame], runnerX, runnerY, 120, 120);
+    ctx.drawImage(sprites[currentFrame], runnerX, runnerY, 90, 90);
 
     // Update runner's position
     runnerX += speed;
