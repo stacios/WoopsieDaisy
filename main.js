@@ -64,22 +64,32 @@ function retryMusicPlayback() {
 // Draw the background to fit the canvas
 function drawBackground() {
     // Draw the first instance of the background
-    ctx.drawImage(background, bgX, 0, canvasWidth, canvasHeight);
-
+    ctx.drawImage(background, bgX, 0, canvasWidth + 1, canvasHeight);
+    
     // Draw the second instance for seamless scrolling
-    ctx.drawImage(background, bgX + canvasWidth, 0, canvasWidth, canvasHeight);
+    ctx.drawImage(background, bgX + canvasWidth, 0, canvasWidth + 1, canvasHeight);
+     
+    // Wrap around to avoid gaps
+     if (bgX <= -canvasWidth) {
+        bgX = 0; // Reset position for seamless scrolling
+    }
 }
 
 // Animation loop
 function animate(timestamp) {
-    ctx.imageSmoothingEnabled = true; // Enable high-quality rendering
+    ctx.imageSmoothingEnabled = false; // Enable high-quality rendering
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     // Draw the background
     drawBackground();
 
     // Scroll the background more slowly
-    bgX -= bgScrollSpeed; // Slower scrolling speed
+    //bgX -= bgScrollSpeed; // Slower scrolling speed
+
+    bgX -= bgScrollSpeed;
+    //bgX = Math.round(bgX);
+
+ 
     if (bgX <= -canvasWidth) {
         bgX = 0; // Reset background position for seamless scrolling
     }
