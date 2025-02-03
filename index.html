@@ -8,32 +8,36 @@
     <style>
         body {
             margin: 0;
-            background-color: #0a1316; /* Sky blue */
+            background-color: #12ade0; /* Sky blue */
+            display: flex;
+            justify-content: center; /* Centers the canvas horizontally */
+            align-items: center; /* Centers the canvas vertically */
+            height: 100vh; /* Keeps it in the center of the screen */
             overflow: hidden; /* Disable scrolling */
         }
 
         canvas {
             display: block;
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+            top: 100;
+            left: 20;
+            width: 73%;
+            height: 75%;
+            border: 3px solid white;}
 
         .frame-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 109%; /* <img src="assets/cool_TV_black.png" alt="Game Frame" class="frame-overlay"> */
             pointer-events: none; /* Ensures the frame doesn't block interactions */
             z-index: 10; /* Ensures the frame is above the canvas */
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="1010" height="600"></canvas>
+    <canvas id="gameCanvas" width="1500" height="1500"></canvas>
     <img src="assets/cool_TV_black.png" alt="Game Frame" class="frame-overlay">
     <script src="main.js"></script>
 </body>
