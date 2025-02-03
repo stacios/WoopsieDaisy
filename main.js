@@ -9,8 +9,8 @@ const canvasHeight = canvas.height-350;
 const frameCount = 20; // Total number of sprite frames
 let currentFrame = 0; // Current frame index
 let runnerX = -100; // Runner's starting X position
-let runnerY = canvasHeight - 50; // Runner's Y position
-let speed = 2; // Runner's speed
+let runnerY = canvasHeight - 100; // Runner's Y position
+let speed = 0.7; // Runner's speed
 let bgX = 0; // Background scrolling position
 const bgScrollSpeed = 1.5; // Adjust this to slow down scrolling
 const animationSpeed = 120; // Milliseconds per frame
@@ -20,6 +20,36 @@ const gravity = 0.4;
 
 let frameDelay = 0; // Counter for frame delay
 const maxFrameDelay = 3; // Adjust to slow down frame transitions
+
+//high score
+let highScore = 0;
+
+function updateHighScore() {
+    if (collectedFlowers > highScore) {
+        highScore = collectedFlowers;
+        localStorage.setItem("highScore", highScore); // Save score
+    }
+}
+
+// Load high score on game start
+if (localStorage.getItem("highScore")) {
+    highScore = parseInt(localStorage.getItem("highScore"));
+}
+
+
+
+//hud
+const flowerIcon = new Image();
+flowerIcon.src = "assets/flower.png"; // Flower icon
+
+function drawHUD() {
+    ctx.fillStyle = "white";
+    ctx.font = "24px Arial";
+    ctx.drawImage(flowerIcon, 40, canvasHeight - 40, 30, 30); // Flower icon
+    ctx.fillText(`x ${collectedFlowers}`, 80, canvasHeight - 15); // Show score
+    ctx.fillText(`High Score: ${highScore}`, canvasWidth - 180, canvasHeight - 25);
+
+}
 
 
 // Preload assets
@@ -52,13 +82,27 @@ let isJumping = false;
 let jumpFrameIndex = 0;
 let velocityY = 0;
 
-
+/*
 function jump() {
     if (!isJumping) {
         isJumping = true;
         if (velocityY === 0) velocityY = -14; // jump strength for a higher jump
     }
+}*/
+
+let canDoubleJump = false;
+
+function jump() {
+    if (!isJumping) {
+        isJumping = true;
+        velocityY = -16; // First jump
+        canDoubleJump = true; // Allows second jump
+    } else if (canDoubleJump) {
+        velocityY = -14; // Second jump is slightly weaker
+        canDoubleJump = false; // Only allow one double jump per air time
+    }
 }
+
 
 
 // Listen for jump input
@@ -68,6 +112,49 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
+// Background music
+const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.5;
+
+// Try playing immediately when the document loads
+document.addEventListener("DOMContentLoaded", () => {
+    playMusic();
+});
+
+// Function to play music and handle autoplay restrictions
+function playMusic() {
+    backgroundMusic.play().catch(() => {
+        console.warn("Autoplay blocked. Waiting for user interaction...");
+        
+        // Listen for the first user interaction, then play
+        document.addEventListener("click", playOnInteraction, { once: true });
+        document.addEventListener("keydown", playOnInteraction, { once: true });
+    });
+}
+
+// Play music once the user interacts with the page
+function playOnInteraction() {
+    backgroundMusic.play();
+    document.removeEventListener("click", playOnInteraction);
+    document.removeEventListener("keydown", playOnInteraction);
+}
+
+
+
+/*
+// Background music
+const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.5;
+
+// Start music as soon as it loads
+backgroundMusic.addEventListener("canplaythrough", () => {
+    backgroundMusic.play().catch(error => {
+        console.warn("Autoplay blocked. Trying again...");
+        setTimeout(() => backgroundMusic.play(), 1000); // Retry after 1 second
+    });
+}); 
 
 // Background music
 const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
@@ -93,7 +180,25 @@ function retryMusicPlayback() {
                 console.warn("Retrying music playback...");
             });
     }, 1000);
+}*/
+
+
+const collectSound = new Audio("assets/collect.mp3"); // Load sound
+
+function checkCollision(flower) {
+    if (!flower.collected &&
+        runnerX < flower.x + flower.width &&
+        runnerX + 90 > flower.x &&
+        runnerY < flower.y + flower.height &&
+        runnerY + 90 > flower.y) {
+        
+        flower.collected = true;
+        collectedFlowers++;
+        updateHighScore();
+        collectSound.play(); // Play sound effect
+    }
 }
+
 
 // Draw the background to fit the canvas
 function drawBackground() {
@@ -140,33 +245,80 @@ class Flower {
 const flowers = [];
 const flowerSpawnRate = 2000; // Spawn every 2 seconds
 
+/*function spawnFlower() {
+    let x, y;
+    let maxAttempts = 10; // Prevent infinite loops
+    let overlap = false;
+
+    do {
+        x = canvas.width + Math.random() * 200; // Spawn off-screen
+        y = runnerY - 50 - Math.random() * 100; // Random height
+        overlap = flowers.some(flower =>
+            Math.abs(flower.x - x) < 40 && Math.abs(flower.y - y) < 40 // Minimum spacing of 40px
+        );
+        maxAttempts--;
+    } while (overlap && maxAttempts > 0);
+
+    flowers.push(new Flower(x, y));
+}*/
+
 function spawnFlower() {
-    let x = canvas.width + Math.random() * 200; // Spawn off-screen
-    let y = runnerY - 50 - Math.random() * 100; // Random height
+    let x, y;
+    let maxAttempts = 10;
+    let overlap = false;
+    let heightLevels = [runnerY - 50, runnerY - 100, runnerY - 150]; // Different heights
+
+    do {
+        x = canvas.width + Math.random() * 200;
+        y = heightLevels[Math.floor(Math.random() * heightLevels.length)]; // Pick a height
+        overlap = flowers.some(flower =>
+            Math.abs(flower.x - x) < 60 && Math.abs(flower.y - y) < 60 // Increased spacing
+        );
+        maxAttempts--;
+    } while (overlap && maxAttempts > 0);
 
     flowers.push(new Flower(x, y));
 }
 
+
+
 // Spawn flowers periodically
 setInterval(spawnFlower, flowerSpawnRate);
-
-
 
 let collectedFlowers = 0;
 
 function checkCollision(flower) {
+    if (!flower.collected &&
+        runnerX < flower.x + flower.width &&
+        runnerX + 130 > flower.x &&  
+        runnerY < flower.y + flower.height &&
+        runnerY + 130 > flower.y) {
+
+        flower.collected = true;
+        collectedFlowers++; 
+        updateHighScore();
+        collectSound.play();
+
+        // Flash effect
+        //ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        //ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        //setTimeout(() => { ctx.clearRect(0, 0, canvasWidth, canvasHeight); }, 100);
+    }
+}
+
+
+/*function checkCollision(flower) {
     if (
+        !flower.collected &&  // Ensures a flower is only counted once
         runnerX < flower.x + flower.width &&
         runnerX + 90 > flower.x &&
         runnerY < flower.y + flower.height &&
         runnerY + 90 > flower.y
     ) {
-        flower.collected = true;
-        collectedFlowers++;
+        flower.collected = true; // Marks the flower as collected immediately
+        collectedFlowers++; // Adds only one point per flower
     }
-}
-
-
+}*/
 
 // Animation loop
 function animate(timestamp) {
@@ -181,8 +333,8 @@ function animate(timestamp) {
         runnerY += velocityY;
         velocityY += gravity;
 
-        if (runnerY >= canvasHeight - 50) { // Ensure correct landing position
-            runnerY = canvasHeight - 50;
+        if (runnerY >= canvasHeight - 100) { // Ensure correct landing position
+            runnerY = canvasHeight - 100;
             isJumping = false;
             jumpFrameIndex = 0;
             velocityY = 0;
@@ -201,12 +353,18 @@ function animate(timestamp) {
 
     }
 
+    // Set a scale factor to make the girl larger
+    const girlWidth = 110;  // Increased from 90 to 150
+    const girlHeight = 110; // Increased from 90 to 150
+
     // Draw the player (jumping or running)
     if (isJumping) {
-        ctx.drawImage(jumpFrames[Math.min(jumpFrameIndex, jumpFrames.length - 1)], runnerX, runnerY, 90, 90);
+        ctx.drawImage(jumpFrames[Math.min(jumpFrameIndex, jumpFrames.length - 1)], 
+                    runnerX, runnerY, girlWidth, girlHeight);
         if (jumpFrameIndex < 29) jumpFrameIndex++;
     } else {
-        ctx.drawImage(sprites[currentFrame], runnerX, runnerY, 90, 90);
+        ctx.drawImage(sprites[currentFrame], 
+                    runnerX, runnerY, girlWidth, girlHeight);
     }
 
     // Move the runner forward
@@ -222,10 +380,11 @@ function animate(timestamp) {
         checkCollision(flower);
     }
 
+    drawHUD();
     // Draw HUD
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.fillText(`Flowers: ${collectedFlowers}`, 40, canvasHeight - 40);
+    //ctx.fillStyle = "white";
+    //ctx.font = "20px Arial";
+    //ctx.fillText(`Flowers: ${collectedFlowers}`, 40, canvasHeight - 40);
 
     requestAnimationFrame(animate);
 }
