@@ -8,40 +8,52 @@
     <style>
         body {
             margin: 0;
-            background-color: #12ade0; /* Sky blue */
+            background-color: #000202; /* Sky blue */
             display: flex;
             justify-content: center; /* Centers the canvas horizontally */
             align-items: center; /* Centers the canvas vertically */
-            height: 100vh; /* Keeps it in the center of the screen */
+            height: 100vh; /* Keeps the game centered */
             overflow: hidden; /* Disable scrolling */
         }
 
-        canvas {
-            display: block;
-            position: absolute;
-            top: 100;
-            left: 20;
-            width: 73%;
-            height: 75%;
-            border: 3px solid white;}
+        /* Container to hold the game */
+        .game-container {
+            position: relative;
+            width: 950px;  /* Adjust width to fit the TV frame */
+            height: 800px; /* Adjust height to fit the TV frame */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
+        /* Canvas properly positioned inside the container */
+        canvas {
+            position: absolute;
+            width: 73%; /* Adjusted to fit inside the TV screen */
+            height: 80%; /* Adjusted to match the screen space */
+            border: 3px solid white;
+            z-index: 5; /* Keeps it below the frame */
+        }
+
+        /* TV Frame Overlay */
         .frame-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 109%; /* <img src="assets/cool_TV_black.png" alt="Game Frame" class="frame-overlay"> */
-            pointer-events: none; /* Ensures the frame doesn't block interactions */
-            z-index: 10; /* Ensures the frame is above the canvas */
+            width: 100%; /* Ensure it fully covers the container */
+            height: 100%;
+            pointer-events: none; /* Ensures clicks go through to the canvas */
+            z-index: 10; /* Keeps it on top */
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="1500" height="1500"></canvas>
-    <img src="assets/cool_TV_black.png" alt="Game Frame" class="frame-overlay">
+    <!-- Game container holds both the frame and the canvas -->
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1000" height="1000"></canvas>
+        <img src="assets/cool_TV_black.png" alt="Game Frame" class="frame-overlay">
+    </div>
+
     <script src="main.js"></script>
 </body>
 </html>
-
-
-

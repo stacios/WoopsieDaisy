@@ -2,20 +2,25 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 // Fixed dimensions for canvas
-const canvasWidth = canvas.width-90;
+const canvasWidth = canvas.width-30;
 const canvasHeight = canvas.height-350;
 
 // Variables
 const frameCount = 20; // Total number of sprite frames
 let currentFrame = 0; // Current frame index
 let runnerX = -100; // Runner's starting X position
-let runnerY = canvasHeight - 150; // Runner's Y position
-let speed = 0.6; // Runner's speed
+let runnerY = canvasHeight - 50; // Runner's Y position
+let speed = 2; // Runner's speed
 let bgX = 0; // Background scrolling position
 const bgScrollSpeed = 1.5; // Adjust this to slow down scrolling
 const animationSpeed = 120; // Milliseconds per frame
 let lastTime = 0; // Timestamp of the last frame
 const gravity = 0.4;
+
+
+let frameDelay = 0; // Counter for frame delay
+const maxFrameDelay = 3; // Adjust to slow down frame transitions
+
 
 // Preload assets
 const background = new Image();
@@ -63,7 +68,7 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-/*
+
 // Background music
 const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
 backgroundMusic.loop = true;
@@ -88,7 +93,7 @@ function retryMusicPlayback() {
                 console.warn("Retrying music playback...");
             });
     }, 1000);
-}*/
+}
 
 // Draw the background to fit the canvas
 function drawBackground() {
@@ -110,13 +115,13 @@ class Flower {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.width = 30;
-        this.height = 30;
+        this.width = 60;
+        this.height = 60;
         this.image = new Image();
         this.image.src = "assets/flower.png";
         this.collected = false;
     }
-
+   
     update() {
         this.x -= bgScrollSpeed; // Move with the background
 
@@ -165,6 +170,7 @@ function checkCollision(flower) {
 
 // Animation loop
 function animate(timestamp) {
+    ctx.imageSmoothingEnabled = true; 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     // Draw background
@@ -175,8 +181,8 @@ function animate(timestamp) {
         runnerY += velocityY;
         velocityY += gravity;
 
-        if (runnerY >= canvasHeight - 150) { // Ensure correct landing position
-            runnerY = canvasHeight - 150;
+        if (runnerY >= canvasHeight - 50) { // Ensure correct landing position
+            runnerY = canvasHeight - 50;
             isJumping = false;
             jumpFrameIndex = 0;
             velocityY = 0;
@@ -185,7 +191,14 @@ function animate(timestamp) {
 
     // Update frame for running animation
     if (!isJumping) {
-        currentFrame = (currentFrame + 1) % frameCount; // Cycle through running frames
+        //currentFrame = (currentFrame + 1) % frameCount; // Cycle through running frames
+            // Update frame (delayed to slow animation)
+        frameDelay++;
+        if (frameDelay >= maxFrameDelay) {
+            currentFrame = (currentFrame + 1) % frameCount;
+            frameDelay = 0;
+        }
+
     }
 
     // Draw the player (jumping or running)

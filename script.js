@@ -29,12 +29,12 @@ for (let i = 1; i <= frameCount; i++) {
         })
     );
 }
-
+/*
 // Load background music
 const backgroundMusic = new Audio("assets/lofi-velvet-lazy-day.mp3");
 backgroundMusic.loop = true; // Loop the music
 backgroundMusic.volume = 0.5; // Set initial volume
-
+ 
 // Attempt to play background music immediately
 document.addEventListener("DOMContentLoaded", () => {
     backgroundMusic.play().catch((error) => {
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-});
+});*/
 
 // Animation loop
 function animate() {
