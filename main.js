@@ -2,15 +2,15 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 // Fixed dimensions for canvas
-const canvasWidth = canvas.width-100;
+const canvasWidth = canvas.width-90;
 const canvasHeight = canvas.height-350;
 
 // Variables
 const frameCount = 20; // Total number of sprite frames
 let currentFrame = 0; // Current frame index
 let runnerX = -100; // Runner's starting X position
-let runnerY = canvasHeight - 50; // Runner's Y position
-let speed = 0.5; // Runner's speed
+let runnerY = canvasHeight - 150; // Runner's Y position
+let speed = 0.6; // Runner's speed
 let bgX = 0; // Background scrolling position
 const bgScrollSpeed = 1.5; // Adjust this to slow down scrolling
 const animationSpeed = 120; // Milliseconds per frame
@@ -51,7 +51,7 @@ let velocityY = 0;
 function jump() {
     if (!isJumping) {
         isJumping = true;
-        velocityY = -14; // jump strength for a higher jump
+        if (velocityY === 0) velocityY = -14; // jump strength for a higher jump
     }
 }
 
@@ -212,7 +212,7 @@ function animate(timestamp) {
     // Draw HUD
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
-    ctx.fillText(`Flowers: ${collectedFlowers}`, 20, 30);
+    ctx.fillText(`Flowers: ${collectedFlowers}`, 40, canvasHeight - 40);
 
     requestAnimationFrame(animate);
 }
