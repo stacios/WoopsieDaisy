@@ -45,6 +45,11 @@ flowerIcon.src = "assets/flower.png"; // Flower icon
 function drawHUD() {
     ctx.fillStyle = "white";
     ctx.font = "24px Arial";
+
+    ctx.textAlign = "center";
+    ctx.fillText("SPACE = JUMP", canvasWidth / 2, canvasHeight - 500);
+
+
     ctx.drawImage(flowerIcon, 40, canvasHeight - 40, 30, 30); // Flower icon
     ctx.fillText(`x ${collectedFlowers}`, 80, canvasHeight - 15); // Show score
     ctx.fillText(`High Score: ${highScore}`, canvasWidth - 180, canvasHeight - 25);
