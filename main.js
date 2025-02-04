@@ -51,7 +51,7 @@ function drawHUD() {
 
 
     ctx.drawImage(flowerIcon, 40, canvasHeight - 40, 30, 30); // Flower icon
-    ctx.fillText(`x ${collectedFlowers}`, 80, canvasHeight - 15); // Show score
+    ctx.fillText(`x ${collectedFlowers}`, 90, canvasHeight - 15); // Show score
     ctx.fillText(`High Score: ${highScore}`, canvasWidth - 180, canvasHeight - 25);
 
 }
